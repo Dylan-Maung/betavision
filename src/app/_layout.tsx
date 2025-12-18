@@ -5,12 +5,13 @@ import 'react-native-reanimated';
 import { PaperProvider } from 'react-native-paper'
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import "../global.css"
+import { AuthProvider } from '../context/auth';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
-
+    <AuthProvider>
       <PaperProvider>
         <Stack>
           <Stack.Screen name="index" options={{ headerShown: false }} />
@@ -18,6 +19,6 @@ export default function RootLayout() {
         </Stack>
         <StatusBar style="auto" />
       </PaperProvider>
-
+    </AuthProvider>
   );
 }
