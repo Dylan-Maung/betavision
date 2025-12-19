@@ -8,7 +8,7 @@ export default function LoginForm() {
     return (
         <View className='flex-1 justify-center items-center'>
         <Text>LoginForm</Text>
-        <Button title="Sign in with Google" onPress={() => signIn} />
+        <Button title="Sign in with Google" onPress={signIn} />
         </View>
     )
 }

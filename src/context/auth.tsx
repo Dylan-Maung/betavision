@@ -1,11 +1,16 @@
 import * as React from "react";
-import { AuthError } from "expo-auth-session"
+import { AuthError, makeRedirectUri, useAuthRequest, AuthRequestConfig, DiscoveryDocument, exchangeCodeAsync} from "expo-auth-session"
 import * as WebBrowser from "expo-web-browser"
+import { BASE_URL, TOKEN_KEY_NAME } from "@/constants/constants";
+import { Platform } from "react-native";
+import * as jose from "jose";
+import { tokenCache } from "../utils/cache";
 
 WebBrowser.maybeCompleteAuthSession();
 
 export type AuthUser = {
     id: string;
+    sub?: string;
     email: string;
     name: string;
     picture?: string;
@@ -25,12 +30,94 @@ const AuthContext = React.createContext({
     error: null as AuthError | null,
 });
 
+const config: AuthRequestConfig = {
+    clientId: "google",
+    scopes: ["openid", "profile", "email"],
+    redirectUri: makeRedirectUri(),
+}
+
+const discovery: DiscoveryDocument = {
+    authorizationEndpoint: `${BASE_URL}/api/auth/authorize`,
+    tokenEndpoint: `${BASE_URL}/api/auth/token`,
+}
+
 export const AuthProvider = ({ children }: {children: React.ReactNode }) => {
     const [user, setUser] = React.useState<AuthUser | null>(null);
     const [isLoading, setIsLoading] = React.useState(false);
     const [error, setError] = React.useState<AuthError | null>(null);
+    const [request, response, promptAsync] = useAuthRequest(config, discovery);
+    const isWeb = Platform.OS === "web"
+    const [accessToken, setAccessToken] = React.useState<string | null>(null);
 
-    const signIn = async () => {};
+    React.useEffect(() => {
+        handleResponse();
+    }, [response])
+
+    const handleResponse = async () => {
+        if (response?.type === "success") {
+            const { code } = response.params;
+
+            try {
+                setIsLoading(true);
+
+                const tokenResponse = await exchangeCodeAsync(
+                    {
+                        code: code,
+                        extraParams: {
+                            platform: Platform.OS
+                        },
+                        clientId: "google",
+                        redirectUri: makeRedirectUri(),
+                    },
+                    discovery
+                );
+
+                console.log("token response", tokenResponse)
+
+                if (isWeb) {
+                    const sessionResponse = await fetch(`${BASE_URL}/api/auth/session`, {
+                        method: "GET",
+                        credentials: "include",
+                    });
+
+                    if (sessionResponse.ok) {
+                        const sessionData = await sessionResponse.json();
+                        setUser(sessionData as AuthUser);
+                    }
+                } else {
+                    const accessToken = tokenResponse.accessToken;
+
+                    setAccessToken(accessToken);
+                    tokenCache?.saveToken(TOKEN_KEY_NAME, accessToken);
+
+                    console.log(accessToken);
+
+                    const decoded = jose.decodeJwt(accessToken);
+                    setUser(decoded as AuthUser);
+                }
+            } catch(e) {
+                console.log(e)
+            } finally {
+                setIsLoading(false);
+            }
+            console.log(code);
+        } else if (response?.type === "error") {
+            setError(response.error as AuthError)
+        }
+    }
+
+    const signIn = async () => {
+        try {
+           if (!request) {
+            console.log("no request");
+            return;
+           }
+
+           await promptAsync();
+        } catch(e){
+            console.log(e);
+        }
+    };
     const signOut = async () => {};
 
     const fetchWithAuth = async (url: string, options?: RequestInit) => {};
@@ -38,7 +125,7 @@ export const AuthProvider = ({ children }: {children: React.ReactNode }) => {
     return (
         <AuthContext.Provider 
             value={{
-                user: null,
+                user,
                 signIn,
                 signOut,
                 fetchWithAuth,
