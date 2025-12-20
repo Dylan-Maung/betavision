@@ -1,6 +1,12 @@
 import { COOKIE_MAX_AGE, COOKIE_NAME, COOKIE_OPTIONS, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI, JWT_EXPIRATION_TIME, JWT_SECRET } from "@/constants/constants";
 import * as jose from "jose";
 
+/**
+ * Exchanges Google authorization code for JWT access token
+ * @param {FormData} code - Authorization code from Google OAuth callback
+ * @param platform - "web" (adds HTTP-only cookie) or "native" (JSON only)
+ * @returns {Response} JSON with access_token, plus Set-Cookie header for web
+ */
 export async function POST(request: Request) {
     const body = await request.formData();
     const code = body.get("code") as string;
@@ -73,5 +79,3 @@ export async function POST(request: Request) {
 
     return Response.json({ access_token: accessToken});
 }
-
-//1:22

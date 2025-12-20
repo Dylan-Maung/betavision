@@ -1,5 +1,14 @@
 import { APP_SCHEME, BASE_URL, GOOGLE_AUTH_URL, GOOGLE_CLIENT_ID, GOOGLE_REDIRECT_URI } from "@/constants/constants";
 
+/**
+ * Initiates Google OAuth flow by redirecting user to Google's authorization endpoint with proper parameters
+ * Query Parameters:
+ * @param {string} client_id - Internal client identifier (e.g., "google")
+ * @param {string} redirect_uri - Where to return after auth (APP_SCHEME for mobile, BASE_URL for web)
+ * @param {string} state - Random state value for CSRF protection (state echoed back with auth code)
+ * @param {string} [scope] - Optional OAuth scopes
+ * @returns {Response} 302 redirect to Google's OAuth authorization page
+ */
 export async function GET(request: Request) {
     if (!GOOGLE_CLIENT_ID) {
         return Response.json(

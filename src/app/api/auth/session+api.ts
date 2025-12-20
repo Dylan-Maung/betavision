@@ -1,6 +1,10 @@
 import * as jose from "jose"
 import { COOKIE_NAME, JWT_SECRET } from "@/constants/constants";
 
+/**
+ * Validates user session by verifying JWT from cookie
+ * @returns {Response} User payload from JWT with cookie expiration time, or error if invalid/missing
+ */
 export async function GET(request: Request) {
     try {
         const cookieHeader = request.headers.get("cookie");
@@ -51,7 +55,7 @@ export async function GET(request: Request) {
                 token,
                 new TextEncoder().encode(JWT_SECRET)
             );
-            
+
             let cookieExpiration: number | null = null;
 
             if (cookies[COOKIE_NAME].maxAge) {
@@ -67,7 +71,7 @@ export async function GET(request: Request) {
                 cookieExpiration,
             });
         } catch (error) {
-            return Response.json({ error: "Invalid oken" }, { status: 401 });
+            return Response.json({ error: "Invalid token" }, { status: 401 });
         }
     } catch (error) {
         console.log("session error:", error)

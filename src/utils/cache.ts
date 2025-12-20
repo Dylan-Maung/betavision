@@ -8,6 +8,10 @@ type TokenCache = {
     deleteToken: (key: string) => Promise<void>;
 }
 
+/**
+ * Secure token storage for mobile platforms using encrypted storage for JWT tokens using Expo SecureStore.
+ * @returns {TokenCache | undefined} Token cache interface for mobile, undefined for web
+ */
 const createTokenCache = (): TokenCache => {
     return {
         getToken: async (key: string) => {

@@ -25,7 +25,7 @@ const AuthContext = React.createContext({
     user: null as AuthUser | null,
     signIn: () => {},
     signOut: () => {},
-    fetchWithAuth: async (url: string, options?: RequestInit) => Promise.resolve(new Response()),
+    fetchWithAuth: async (url: string, options: RequestInit) => Promise.resolve(new Response()),
     isLoading: false,
     error: null as AuthError | null,
 });
@@ -52,6 +52,45 @@ export const AuthProvider = ({ children }: {children: React.ReactNode }) => {
     React.useEffect(() => {
         handleResponse();
     }, [response])
+
+    React.useEffect(() => {
+        const restoreSession = async() => {
+            setIsLoading(true);
+            try {
+                if (isWeb) {
+                    const sessionRestoreResponse = await fetch(`${BASE_URL}/api/auth/session`, {
+                        method: 'GET',
+                        credentials: "include"
+                    });
+
+                    if (sessionRestoreResponse.ok) {
+                        const userData = await sessionRestoreResponse.json();
+                        setUser(userData as AuthUser)
+                    }
+                } else {
+                    // Native (mobile)
+                    const storedAccessToken = await tokenCache?.getToken(TOKEN_KEY_NAME);
+
+                    if (storedAccessToken) {
+                        try {
+                            const decoded = jose.decodeJwt(storedAccessToken);
+                            setAccessToken(storedAccessToken);
+                            setUser(decoded as AuthUser);
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    } else {
+                        console.log("user not authenticated");
+                    }
+                }
+            } catch (e) {
+                console.log(e)
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        restoreSession();
+    }, [isWeb])
 
     const handleResponse = async () => {
         if (response?.type === "success") {
@@ -85,6 +124,7 @@ export const AuthProvider = ({ children }: {children: React.ReactNode }) => {
                         setUser(sessionData as AuthUser);
                     }
                 } else {
+                    // Native (mobile)
                     const accessToken = tokenResponse.accessToken;
 
                     setAccessToken(accessToken);
@@ -118,9 +158,60 @@ export const AuthProvider = ({ children }: {children: React.ReactNode }) => {
             console.log(e);
         }
     };
-    const signOut = async () => {};
+    const signOut = async () => {
+        if (isWeb) {
+            try {
+                await fetch(`${BASE_URL}/api/auth/logout`, {
+                    method: "POST",
+                    credentials: "include",
+                });
+            } catch (e) {
+                console.error("Error during web logout: ", e)
+            }
+        } else {
+            await tokenCache?.deleteToken(TOKEN_KEY_NAME);
+        }
 
-    const fetchWithAuth = async (url: string, options?: RequestInit) => {};
+        setUser(null);
+        
+    };
+
+    const fetchWithAuth = async (url: string, options: RequestInit) => {
+        if (isWeb) {
+            const response = await fetch(url, {
+                ...options,
+                credentials: "include",
+            });
+
+            // if (response.status === 401) {
+            //     console.log("API request failed with 401")
+
+            //     //Can refresh token or log user out:
+            //     refreshAccessToken();
+
+            //     if (user) {
+            //         return fetch(url, {
+            //             ...options,
+            //             credentials: "include",
+            //         });
+            //     }
+            // }
+            return response;
+        } else {
+            // Native (mobile)
+            const response = await fetch(url, {
+                ...options,
+                headers: {
+                    ...options.headers,
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            })
+
+            // If response 401 can refresh token
+
+            return response;
+        }
+    };
 
     return (
         <AuthContext.Provider 
