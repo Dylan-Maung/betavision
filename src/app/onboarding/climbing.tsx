@@ -27,17 +27,19 @@ export default function ClimbingInfo() {
 
         <View className='flex flex-row gap-2'>
           <Text>Hardest Boulder Grade: </Text>
-          <Picker
-            selectedValue={grade}
-            onValueChange={(itemValue, itemIndex) =>
-              setGrade(itemValue)
-            }>
-            {boulderGrades.map((grade) => (
-              <Picker.Item key={grade} label={grade} value={grade} />
-            ))}
-          </Picker>
+          <View className="flex-1 border border-gray-300 rounded-lg bg-white">
+            <Picker
+              selectedValue={grade}
+              onValueChange={(itemValue) => setGrade(itemValue)}
+              style={{ height: 50 }}
+            >
+              {boulderGrades.map((grade) => (
+                <Picker.Item key={grade} label={grade} value={grade} />
+              ))}
+            </Picker>
+          </View>
         </View>
-        
+
         <Button title="Next" onPress={handleNext}/>
     </View>
   )

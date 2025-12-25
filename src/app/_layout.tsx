@@ -15,6 +15,8 @@ function RootLayoutNav() {
 
   return (
     <Stack>
+      <Stack.Screen name="index" options={{ headerShown: false, animation: "none" }} />
+
       <Stack.Protected guard={user === null}>
         <Stack.Screen name="login" options={{ headerShown: false, animation: "none" }} />
       </Stack.Protected>
@@ -28,7 +30,6 @@ function RootLayoutNav() {
       </Stack.Protected>
     </Stack>
   )
-
 }
 
 export default function RootLayout() {

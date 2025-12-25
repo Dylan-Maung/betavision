@@ -69,8 +69,11 @@ export const AuthProvider = ({ children }: {children: React.ReactNode }) => {
                     });
 
                     if (sessionRestoreResponse.ok) {
-                        const userData = await sessionRestoreResponse.json();
+                        const userData = await sessionRestoreResponse.json() as AuthUser;
                         setUser(userData as AuthUser)
+                        
+                        const profile = await getUserProfile(userData.sub);
+                        setOnboarded(!!profile);
                     }
                 } else {
                     // Native (mobile)
@@ -78,9 +81,12 @@ export const AuthProvider = ({ children }: {children: React.ReactNode }) => {
 
                     if (storedAccessToken) {
                         try {
-                            const decoded = jose.decodeJwt(storedAccessToken);
+                            const decoded = jose.decodeJwt(storedAccessToken) as AuthUser;
                             setAccessToken(storedAccessToken);
                             setUser(decoded as AuthUser);
+
+                            const profile = await getUserProfile(decoded.sub);
+                            setOnboarded(!!profile);
                         } catch (e) {
                             console.log(e);
                         }
@@ -133,11 +139,15 @@ export const AuthProvider = ({ children }: {children: React.ReactNode }) => {
 
                         // Onboarding first time user
                         if (!profile) {
-                            router.replace('/onboarding');
+                            console.log("New User")
+                            setOnboarded(false);
+                            //router.replace('/onboarding');
                         } else {
                             setOnboarded(true);
-                            setTimeout(() => router.replace('/(mainTabs)/home'), 10);
+                            //setTimeout(() => router.replace('/(mainTabs)/home'), 10);
                         }
+                    } else {
+                        router.replace('/login');
                     }
                 } else {
                     // Native (mobile)
