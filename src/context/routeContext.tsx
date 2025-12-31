@@ -1,12 +1,12 @@
-import { createContext, useState, useContext } from 'react';
+import { createContext, useState, useContext, Dispatch, SetStateAction } from 'react';
 import { RouteData, RouteDataForm } from '../types/routeData';
 import { Hold } from '../types/hold';
 
 type RouteDataFormContextType = {
     formData: RouteDataForm;
     updateFormData: (data: RouteDataForm) => void;
-    placedHolds?: Hold[];
-    setPlacedHolds: (holds: Hold[]) => void;
+    placedHolds: Hold[];
+    setPlacedHolds: Dispatch<SetStateAction<Hold[]>>;
 };
 
 const RouteDataFormContext = createContext<RouteDataFormContextType | undefined>(undefined);

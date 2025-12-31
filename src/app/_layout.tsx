@@ -5,7 +5,7 @@ import { PaperProvider } from 'react-native-paper'
 import "../global.css"
 import { AuthProvider } from '../context/auth';
 import { useAuth } from '../context/auth';
-
+ 
 function RootLayoutNav() {
   const { user, isLoading, onboarded } = useAuth();
   

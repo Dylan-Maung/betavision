@@ -23,6 +23,7 @@ export default function HoldData() {
         let result = await ImagePicker.launchImageLibraryAsync({
             allowsEditing: true,
             quality: 1,
+            mediaTypes: 'images',
         });
 
         if (!result.canceled) {

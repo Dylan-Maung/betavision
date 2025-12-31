@@ -1,10 +1,8 @@
 import { View, Text, ScrollView, Pressable, Button, Image } from 'react-native'
 import React, { useState } from 'react'
 import { useRouteDataForm } from '@/src/context/routeContext'
-import WallCard from '@/src/components/wallCard';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Hold } from '@/src/types/hold';
 
 export default function holdPositions() {
   const { formData, placedHolds = [] } = useRouteDataForm();
@@ -35,7 +33,6 @@ export default function holdPositions() {
 
                               <View className='p-2 flex items-center'>
                                 <Text className='text-white'>Angle: {wall.angle}°</Text>
-                                <Text className='text-white'>Holds Placed: </Text>
                               </View>
                             </View>
                           </Pressable>

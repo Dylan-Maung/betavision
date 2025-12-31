@@ -128,7 +128,7 @@ export const AuthProvider = ({ children }: {children: React.ReactNode }) => {
                     discovery
                 );
 
-                console.log("token response", tokenResponse)
+                //console.log("token response", tokenResponse)
 
                 if (isWeb) {
                     const sessionResponse = await fetch(`${BASE_URL}/api/auth/session`, {
@@ -142,7 +142,7 @@ export const AuthProvider = ({ children }: {children: React.ReactNode }) => {
                         
                         let profile = await getUserProfile(sessionData.sub);
                         setProfile(profile);
-                        console.log("Profile is: ", profile);
+                        //console.log("Profile is: ", profile);
 
                         // Onboarding first time user
                         if (!profile) {
@@ -163,7 +163,7 @@ export const AuthProvider = ({ children }: {children: React.ReactNode }) => {
                     setAccessToken(accessToken);
                     tokenCache?.saveToken(TOKEN_KEY_NAME, accessToken);
 
-                    console.log(accessToken);
+                    //console.log(accessToken);
 
                     const decoded = jose.decodeJwt(accessToken);
                     setUser(decoded as AuthUser);
@@ -173,7 +173,7 @@ export const AuthProvider = ({ children }: {children: React.ReactNode }) => {
             } finally {
                 setIsLoading(false);
             }
-            console.log(code);
+            //console.log(code);
         } else if (response?.type === "error") {
             setError(response.error as AuthError)
         }
